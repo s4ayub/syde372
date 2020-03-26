@@ -18,8 +18,8 @@ while (size(a,1) > 0 && size(b,1) > 0)
     misclassified_b = 1;
     while (sum(misclassified_a>0) > 0 && sum(misclassified_b>0) > 0)
         % 2. Randomly select one point from a and one point from b
-        a_point = get_random_point(a)
-        b_point = get_random_point(b)
+        a_point = get_random_point(a);
+        b_point = get_random_point(b);
 
         % 3. Create a discriminant G using MED with the two points as prototypes
         % 4. Using all of the data in a and b, work out the confusion matrix entries
@@ -68,8 +68,6 @@ for x = 1:size(xgrid, 2)
     end
 end
 
-% imshow(decision_grid, [1,10]);
-% light red and blue colors
 x = 0.8;
 light_rb = [1 x x; x x 1];
 colors = [1 x x; x x 1; x 1 x];
@@ -77,7 +75,10 @@ gscatter(xgrid(:), ygrid(:), predicted, colors);
 hold on;
 plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
 hold on
-plot(B(:,1), B(:, 2), 'o', 'color', 'green', 'MarkerSize',3);
+plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
+title("Sequential Discriminants Classifier",'FontSize',15);
+ylabel("y-axis");
+xlabel("x-axis");
 legend off, axis tight
 
 
@@ -121,7 +122,7 @@ function new_values = remove_points(values, wrong_at_index)
         new_values = zeros(length,2);
         index = 1;
         for i=1:size(wrong_at_index)
-            if (wrong_at_index(i) == 0)
+            if (wrong_at_index(i) == 1)
                 new_values(index,:) = values(i, :);
                 index = index + 1;
             end
@@ -130,7 +131,7 @@ function new_values = remove_points(values, wrong_at_index)
 end
 
  function [xgrid, ygrid] = getMeshgrid(A ,B)
-    step = 10;
+    step = 1;
     maxXY = max(max(A),max(B));
     minXY = min(min(A), min(B));
     [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
