@@ -77,8 +77,8 @@ a_plot = plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
 hold on
 b_plot = plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
 title("Sequential Discriminants Classifier",'FontSize',15);
-ylabel("y-axis");
-xlabel("x-axis");
+ylabel("x2");
+xlabel("x1");
 legend([a_plot, b_plot], "Class A", "Class B", "Location", 'northeast');
 axis tight
 
