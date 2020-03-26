@@ -1,11 +1,13 @@
 clear all;
+close all;
 % Sequential Discriminants (Q4)
 load('lab2_3.mat');
 
 A = a;
 B = b;
 
-discriminants = {};
+discriminants_a = {};
+discriminants_b = {};
 all_num_wrong_a = {};
 all_num_wrong_b = {};
 
@@ -30,7 +32,8 @@ while (size(a,1) > 0 && size(b,1) > 0)
     num_wrong_a = sum(misclassified_a>0);
     num_wrong_b = sum(misclassified_b>0);
     % 6. This discriminant is good; save it
-    discriminants = [discriminants, [a_point; b_point]];
+    discriminants_a = [discriminants_a, a_point];
+    discriminants_b = [discriminants_b, b_point];
     all_num_wrong_a = [all_num_wrong_a, num_wrong_a];
     all_num_wrong_b = [all_num_wrong_b, num_wrong_b];  
 
@@ -48,11 +51,36 @@ while (size(a,1) > 0 && size(b,1) > 0)
     j = j + 1;
 end
 
-% 1. Let j = 1
-j = 1;
-% 2. If Gj classifies x as class B and num_wrong_a,j = 0 then “Say Class B”
-% 3. If Gj classifies x as class A and num_wrong_b,j = 0 then “Say Class A”
-% 4. Otherwise j = j + 1 and go back to step 2.
+all_num_wrong_a = cell2mat(all_num_wrong_a);
+all_num_wrong_b = cell2mat(all_num_wrong_b);
+
+[xgrid, ygrid] = getMeshgrid(A, B);
+length = size(xgrid, 1) * size(xgrid,2);
+predicted = zeros(1, size(xgrid, 1) * size(xgrid,2));
+points = {};
+index = 1;
+for x = 1:size(xgrid, 2)
+    for y = 1:size(ygrid, 1)
+        xval = xgrid(1,x);
+        yval = ygrid(y,1);
+%         points = [points, [xval, yval]];
+        predicted(1,index) = classify_point([xval, yval], discriminants_a, discriminants_b, all_num_wrong_a, all_num_wrong_b);
+        index = index +1;
+    end
+end
+
+% imshow(decision_grid, [1,10]);
+% light red and blue colors
+x = 0.8;
+light_rb = [1 x x; x x 1];
+colors = [1 x x; x x 1; x 1 x];
+gscatter(xgrid(:), ygrid(:), predicted, colors);
+hold on;
+plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
+hold on
+plot(B(:,1), B(:, 2), 'o', 'color', 'green', 'MarkerSize',3);
+legend off, axis tight
+
 
 function [index, point] = get_random_point(values)
     length = size(values,1);
@@ -94,5 +122,34 @@ function [new_values] = remove_points(values, wrong_at_index)
                 index = index + 1;
             end
         end
+    end
+end
+
+ function [xgrid, ygrid] = getMeshgrid(A ,B)
+    step = 3;
+    maxXY = max(max(A),max(B));
+    minXY = min(min(A), min(B));
+    [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
+ end
+ 
+ function group = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b)
+    group = 3;
+    % 1. Let j = 1
+    for j=1:size(num_wrong_a, 2)
+        diff = med_classify(point, cell2mat(disc_a(j)), cell2mat(disc_b(j)));
+        % 2. If Gj classifies x as class B and num_wrong_a,j = 0 then “Say Class B”
+        if (diff >= 0 && num_wrong_a(j) == 0 )
+            group = 2;
+            break;
+        % 3. If Gj classifies x as class A and num_wrong_b,j = 0 then “Say Class A”
+        elseif (diff <= 0 && num_wrong_b(j) == 0)
+            group = 1;
+            break;
+        end
+        % 4. Otherwise j = j + 1 and go back to step 2.
+    end
+    
+    if (group == 3)
+        disp("Something is wrong")
     end
 end
