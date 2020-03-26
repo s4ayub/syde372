@@ -54,7 +54,7 @@ end
 all_num_wrong_a = cell2mat(all_num_wrong_a);
 all_num_wrong_b = cell2mat(all_num_wrong_b);
 
-[xgrid, ygrid] = getMeshgrid(A, B);
+[xgrid, ygrid] = get_meshgrid(A, B);
 length = size(xgrid, 1) * size(xgrid,2);
 predicted = zeros(1, size(xgrid, 1) * size(xgrid,2));
 points = {};
@@ -73,13 +73,14 @@ light_rb = [1 x x; x x 1];
 colors = [1 x x; x x 1; x 1 x];
 gscatter(xgrid(:), ygrid(:), predicted, colors);
 hold on;
-plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
+a_plot = plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
 hold on
-plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
+b_plot = plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
 title("Sequential Discriminants Classifier",'FontSize',15);
 ylabel("y-axis");
 xlabel("x-axis");
-legend off, axis tight
+legend([a_plot, b_plot], "Class A", "Class B", "Location", 'northeast');
+axis tight
 
 
 function point = get_random_point(values)
@@ -130,8 +131,8 @@ function new_values = remove_points(values, wrong_at_index)
     end
 end
 
- function [xgrid, ygrid] = getMeshgrid(A ,B)
-    step = 1;
+ function [xgrid, ygrid] = get_meshgrid(A ,B)
+    step = 2;
     maxXY = max(max(A),max(B));
     minXY = min(min(A), min(B));
     [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
