@@ -18,8 +18,8 @@ while (size(a,1) > 0 && size(b,1) > 0)
     misclassified_b = 1;
     while (sum(misclassified_a>0) > 0 && sum(misclassified_b>0) > 0)
         % 2. Randomly select one point from a and one point from b
-        [a_index, a_point] = get_random_point(a);
-        [b_index, b_point] = get_random_point(b);
+        a_point = get_random_point(a)
+        b_point = get_random_point(b)
 
         % 3. Create a discriminant G using MED with the two points as prototypes
         % 4. Using all of the data in a and b, work out the confusion matrix entries
@@ -63,7 +63,6 @@ for x = 1:size(xgrid, 2)
     for y = 1:size(ygrid, 1)
         xval = xgrid(1,x);
         yval = ygrid(y,1);
-%         points = [points, [xval, yval]];
         predicted(1,index) = classify_point([xval, yval], discriminants_a, discriminants_b, all_num_wrong_a, all_num_wrong_b);
         index = index +1;
     end
@@ -82,34 +81,39 @@ plot(B(:,1), B(:, 2), 'o', 'color', 'green', 'MarkerSize',3);
 legend off, axis tight
 
 
-function [index, point] = get_random_point(values)
+function point = get_random_point(values)
     length = size(values,1);
     index = randi(length);
     point = values(index,:);
 end
 
-% If diff < 0 then class A, else class B
-function [diff] = med_classify(point,a,b)
+function isClassA = med_classify(point,a,b)
     dist_a = sqrt((a(1)-point(1))^2 + (a(2)-point(2))^2);
     dist_b = sqrt((b(1)-point(1))^2 + (b(2)-point(2))^2);
+    
+    if (dist_a <= dist_b)
+        isClassA = 1;
+    else
+        isClassA = 0;
+    end
 
-    diff = dist_a - dist_b;
 end
 
-function [misclassified] = get_misclassified_at_index(values, a, b, isA)
+function misclassified = get_misclassified_at_index(values, a, b, isA)
     length = size(values, 1);
     misclassified = zeros(length,1);
     for i=1:length
-        dist = med_classify(values(i,:), a, b);
-        if (isA)
-            misclassified(i) = dist >= 0;
-        else 
-            misclassified(i) = dist < 0;
+        isClassA = med_classify(values(i,:), a, b);
+        if (isA == 1&& isClassA == 1 || isA == 0 && isClassA == 0)
+            misclassified(i) = 0;
+        else
+            misclassified(i) = 1;
         end
+            
     end
 end
 
-function [new_values] = remove_points(values, wrong_at_index)
+function new_values = remove_points(values, wrong_at_index)
     length = sum(wrong_at_index>0);
     if (length == 0)
         new_values = [];
@@ -126,7 +130,7 @@ function [new_values] = remove_points(values, wrong_at_index)
 end
 
  function [xgrid, ygrid] = getMeshgrid(A ,B)
-    step = 3;
+    step = 10;
     maxXY = max(max(A),max(B));
     minXY = min(min(A), min(B));
     [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
@@ -136,13 +140,13 @@ end
     group = 3;
     % 1. Let j = 1
     for j=1:size(num_wrong_a, 2)
-        diff = med_classify(point, cell2mat(disc_a(j)), cell2mat(disc_b(j)));
+        isClassA = med_classify(point, cell2mat(disc_a(j)), cell2mat(disc_b(j)));
         % 2. If Gj classifies x as class B and num_wrong_a,j = 0 then “Say Class B”
-        if (diff >= 0 && num_wrong_a(j) == 0 )
+        if (isClassA == 0 && num_wrong_a(j) == 0 )
             group = 2;
             break;
         % 3. If Gj classifies x as class A and num_wrong_b,j = 0 then “Say Class A”
-        elseif (diff <= 0 && num_wrong_b(j) == 0)
+        elseif (isClassA == 1 && num_wrong_b(j) == 0)
             group = 1;
             break;
         end
