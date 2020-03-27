@@ -35,6 +35,7 @@ plot(num_classifiers_list,avg_error_rate, '-o','LineWidth',2)
 ylabel('Error Rate')
 yticks([0 0.2 0.4 0.6 0.8 1.0])
 ylim([0 1])
+grid on
 title('Average error rate')
 
 subplot(4,1,2)
@@ -42,6 +43,7 @@ plot(num_classifiers_list,max_error, '-o','LineWidth',2)
 ylabel('Error Rate')
 yticks([0 0.2 0.4 0.6 0.8 1.0])
 ylim([0 1])
+grid on
 title('Max error rate')
 
 subplot(4,1,3)
@@ -49,6 +51,7 @@ plot(num_classifiers_list,min_error, '-o','LineWidth',2)
 ylabel('Error Rate')
 yticks([0 0.2 0.4 0.6 0.8 1.0])
 ylim([0 1])
+grid on
 title('Min error rate')
 
 subplot(4,1,4)
@@ -57,6 +60,7 @@ xlabel('Number of Classifiers')
 ylabel('Error Rate')
 yticks([0 0.2 0.4 0.6 0.8 1.0])
 ylim([0 1])
+grid on
 title('Standard deviation of error rate')
 
 function [disc_a, disc_b, num_wrong_a, num_wrong_b, xgrid, ygrid, predicted] = build_seq_classifier(lim_classifiers, a, b)
