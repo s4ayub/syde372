@@ -21,7 +21,7 @@ for limit_num_classifiers = 1:max_num_classifiers
         [disc_a, disc_b, num_wrong_a, num_wrong_b, xgrid, ygrid, predicted] = build_seq_classifier(limit_num_classifiers, a, b);
         error_across_runs = [error_across_runs, calculate_error(A, B, disc_a, disc_b, num_wrong_a, num_wrong_b)];
     end
-        
+    
     avg_error_rate = [avg_error_rate, sum(error_across_runs) / max_iterations];
     max_error = [max_error, max(error_across_runs)];
     min_error = [min_error, min(error_across_runs)];
@@ -29,34 +29,25 @@ for limit_num_classifiers = 1:max_num_classifiers
 end
 
 num_classifiers_list = [1, 2, 3, 4, 5];
+avg_error_rate
+max_error
+min_error
+std_dev_error
 
 subplot(4,1,1)
-plot(num_classifiers_list,avg_error_rate, '-o','LineWidth',2)
-ylabel('Error Rate')
-yticks([0 0.2 0.4 0.6 0.8 1.0])
-ylim([0 1])
+plot(num_classifiers_list,avg_error_rate, '-o','LineWidth',2,)
 title('Average error rate')
 
 subplot(4,1,2)
 plot(num_classifiers_list,max_error, '-o','LineWidth',2)
-ylabel('Error Rate')
-yticks([0 0.2 0.4 0.6 0.8 1.0])
-ylim([0 1])
 title('Max error rate')
 
 subplot(4,1,3)
-plot(num_classifiers_list,min_error, '-o','LineWidth',2)
-ylabel('Error Rate')
-yticks([0 0.2 0.4 0.6 0.8 1.0])
-ylim([0 1])
+plot(num_classifiers_list,min_error, '-o', 'LineWidth',2)
 title('Min error rate')
 
 subplot(4,1,4)
-plot(num_classifiers_list,std_dev_error, '-o','LineWidth',2)
-xlabel('Number of Classifiers')
-ylabel('Error Rate')
-yticks([0 0.2 0.4 0.6 0.8 1.0])
-ylim([0 1])
+plot(num_classifiers_list,std_dev_error, '-o')
 title('Standard deviation of error rate')
 
 function [disc_a, disc_b, num_wrong_a, num_wrong_b, xgrid, ygrid, predicted] = build_seq_classifier(lim_classifiers, a, b)
