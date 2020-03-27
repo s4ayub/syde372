@@ -13,7 +13,7 @@ num_wrong_b = {};
 
 % 1. Let a and b represent the data points in classes A and B. Let j = 1.
 j = 1;
-limit_num_classifiers = 1;
+limit_num_classifiers = 50;
 
 while (size(a,1) > 0 && size(b,1) > 0 && j <= limit_num_classifiers)
     misclass_a = 1;
@@ -69,20 +69,17 @@ for x = 1:size(xgrid, 2)
         index = index +1;
     end
 end
-
-x = 0.8;
-light_rb = [1 x x; x x 1];
-colors = [1 x x; x x 1; x 1 x];
-myscatter = gscatter(xgrid(:), ygrid(:), predicted, colors);
+myScatter = gscatter(xgrid(:), ygrid(:), predicted);
+editGScatter(myScatter);
 hold on;
-a_plot = plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
+a_plot = plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize', 3, 'DisplayName', 'Class A Points');
 hold on
-b_plot = plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
+b_plot = plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize', 3, 'DisplayName', 'Class B Points');
 title("Sequential Discriminants Classifier",'FontSize',15);
 ylabel("x2");
 xlabel("x1");
-% legend([a_plot, b_plot], "Class A", "Class B", "Location", 'northeast');
-plot_disc(disc_a, disc_b);
+% plot_disc(disc_a, disc_b);
+myLegend = legend('Location', 'northeast');
 limit_axes(A,B);
 error = calculate_error(A, B, disc_a, disc_b, num_wrong_a, num_wrong_b)
 
@@ -101,12 +98,12 @@ A_class = zeros(1, A_size);
 B_class = zeros(1, B_size);
 
 for i=1:A_size
-   point = A(i,:)
+   point = A(i,:);
    A_class(1,i) = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b);
 end
 
 for i=1:B_size
-   point = B(i,:)
+   point = B(i,:);
    B_class(1,i) = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b);
 end
 
@@ -197,14 +194,14 @@ function new_values = remove_points(values, wrong_at_index)
 end
 
  function [xgrid, ygrid] = get_meshgrid(A ,B)
-    step = 2;
+    step = 1;
     maxXY = max(max(A),max(B));
     minXY = min(min(A), min(B));
     [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
  end
  
  function group = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b)
-    group = 0;
+    group = 3;
     % 1. Let j = 1
     for j=1:size(num_wrong_a, 2)
         isClassA = med_classify(point, disc_a{j}, disc_b{j});
@@ -220,7 +217,19 @@ end
         % 4. Otherwise j = j + 1 and go back to step 2.
     end
     
-%     if (group == 0)
+%     if (group == 3)
 %         disp("Something is wrong")
 %     end
+ end
+
+ % Get Colors for ScatterPlot depending on which values show up first
+ function editGScatter(myScatter)
+    x = 0.8;
+    legend = ["Class A Region", "Class B Region", "Unclassified Region"];
+    colors = [1 x x; x x 1; x 1 x];
+    for i=1:size(myScatter,1)
+        index = str2double(myScatter(i).DisplayName);
+        myScatter(i).Color = colors(index,:);
+        myScatter(i).DisplayName = legend(index);
+    end
 end
