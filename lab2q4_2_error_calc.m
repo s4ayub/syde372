@@ -30,9 +30,11 @@ while (size(a,1) > 0 && size(b,1) > 0) && j < (limit_num_classifiers + 1)
 
         %5. If num_wrong_a != 0 and num_wrong_b != 0 then no good, go back to step 2.
     end
-
+    
     num_wrong_a = sum(misclassified_a>0);
     num_wrong_b = sum(misclassified_b>0);
+    
+    
     % 6. This discriminant is good; save it
     discriminants_a = [discriminants_a, a_point];
     discriminants_b = [discriminants_b, b_point];
@@ -40,11 +42,13 @@ while (size(a,1) > 0 && size(b,1) > 0) && j < (limit_num_classifiers + 1)
     all_num_wrong_b = [all_num_wrong_b, num_wrong_b];  
 
     % 7. If num_wrong_a = 0 then remove those points from b that G classifies as B.
+    % All points classified as B are good.
     if (num_wrong_a == 0)
         b = remove_points(b, misclassified_b);
     end
 
     % 8. If num_wrong_b = 0 then remove those points from a that G classifies as A.
+    % All points classified as A are good.
     if (num_wrong_b == 0)
         a = remove_points(a, misclassified_a);
     end
@@ -56,34 +60,44 @@ end
 all_num_wrong_a = cell2mat(all_num_wrong_a);
 all_num_wrong_b = cell2mat(all_num_wrong_b);
 
-[xgrid, ygrid] = get_meshgrid(A, B);
-length = size(xgrid, 1) * size(xgrid,2);
-predicted = zeros(1, size(xgrid, 1) * size(xgrid,2));
-points = {};
-index = 1;
-for x = 1:size(xgrid, 2)
-    for y = 1:size(ygrid, 1)
-        xval = xgrid(1,x);
-        yval = ygrid(y,1);
-        predicted(1,index) = classify_point([xval, yval], discriminants_a, discriminants_b, all_num_wrong_a, all_num_wrong_b);
-        index = index +1;
+
+% Iterate through every point in the training set and count error rate
+num_errors = 0;
+
+"--- STARTING A --------"
+
+num_points_in_A = size(A,1);
+a_responses = zeros(num_points_in_A, 1);
+for i=1:num_points_in_A
+    point = A(1,:);
+    x1 = point(1);
+    x2 = point(2);
+    
+    group = classify_point([x1, x2], discriminants_a, discriminants_b, all_num_wrong_a, all_num_wrong_b);
+    a_responses(i) = group;
+
+    if group ~= 1
+        num_errors = num_errors + 1;
     end
 end
 
-x = 0.8;
-light_rb = [1 x x; x x 1];
-colors = [1 x x; x x 1; x 1 x];
-gscatter(xgrid(:), ygrid(:), predicted, colors);
-hold on;
-a_plot = plot(A(:,1), A(:, 2), 'o', 'color', 'red', 'MarkerSize',3);
-hold on
-b_plot = plot(B(:,1), B(:, 2), 'o', 'color', 'blue', 'MarkerSize',3);
-title("Sequential Discriminants Classifier",'FontSize',15);
-ylabel("x2");
-xlabel("x1");
-legend([a_plot, b_plot], "Class A", "Class B", "Location", 'northeast');
-axis tight
+"--- STARTING B --------"
+num_points_in_B = size(B,1);
+b_responses = zeros(num_points_in_B, 1);
+for i=1:num_points_in_B
+    point = B(1,:);
+    x1 = point(1);
+    x2 = point(2);
 
+    group = classify_point([x1, x2], discriminants_a, discriminants_b, all_num_wrong_a, all_num_wrong_b);
+    b_responses(i) = group;
+    
+    if group ~= 2
+        num_errors = num_errors + 1;
+    end
+end
+
+error_rate = num_errors / (num_points_in_B + num_points_in_A)
 
 function point = get_random_point(values)
     length = size(values,1);
@@ -108,7 +122,7 @@ function misclassified = get_misclassified_at_index(values, a, b, isA)
     misclassified = zeros(length,1);
     for i=1:length
         isClassA = med_classify(values(i,:), a, b);
-        if (isA == 1&& isClassA == 1 || isA == 0 && isClassA == 0)
+        if (isA == 1 && isClassA == 1 || isA == 0 && isClassA == 0)
             misclassified(i) = 0;
         else
             misclassified(i) = 1;
@@ -133,21 +147,15 @@ function new_values = remove_points(values, wrong_at_index)
     end
 end
 
- function [xgrid, ygrid] = get_meshgrid(A ,B)
-    step = 2;
-    maxXY = max(max(A),max(B));
-    minXY = min(min(A), min(B));
-    [xgrid, ygrid] = meshgrid(minXY(1):step:maxXY(1), minXY(2):step:maxXY(2));
- end
- 
- function group = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b)
+% Group 1 - A, Group 2 - B
+function group = classify_point(point, disc_a, disc_b, num_wrong_a, num_wrong_b)
     group = 3;
     % 1. Let j = 1
     for j=1:size(num_wrong_a, 2)
         isClassA = med_classify(point, cell2mat(disc_a(j)), cell2mat(disc_b(j)));
         % 2. If Gj classifies x as class B and num_wrong_a,j = 0 then “Say Class B”
         if (isClassA == 0 && num_wrong_a(j) == 0 )
-            group = 2;
+            group = 2; 
             break;
         % 3. If Gj classifies x as class A and num_wrong_b,j = 0 then “Say Class A”
         elseif (isClassA == 1 && num_wrong_b(j) == 0)
