@@ -59,6 +59,7 @@ plot(num_classifiers_list,std_dev_error, '-o','LineWidth',2)
 xlabel('Number of Classifiers')
 ylabel('Error Rate')
 yticks([0 0.2 0.4 0.6 0.8 1.0])
+ 
 ylim([0 1])
 grid on
 title('Standard deviation of error rate')
