@@ -23,7 +23,7 @@ x2_grid = linspace(0, 450, n_points);
 x = [x1(:) x2(:)];
 
 decision_grid = zeros(n_points, n_points);
-%% Other Stuff
+%% Plotting
 mean = [0,0]; 
 sigma = [400 0; 0 400];
 dat_x1 = -450:1:450; 
@@ -74,9 +74,13 @@ end
 figure(1);
 imshow(decision_grid, [1,10]);
 hold on;
-scatter(at(:,1),at(:,2),'r');
-scatter(bt(:,1),bt(:,2),'g');
-scatter(ct(:,1),ct(:,2),'b');
+scatter(al(:,1),al(:,2),'r', 'o');
+scatter(bl(:,1),bl(:,2),'g', 'o');
+scatter(cl(:,1),cl(:,2),'b', 'o');
+
+scatter(at(:,1),at(:,2),'r', 'x');
+scatter(bt(:,1),bt(:,2),'g', 'x');
+scatter(ct(:,1),ct(:,2),'b', 'x');
 hold off;
 axis on;
 xlim([0,450]);
@@ -84,8 +88,8 @@ ylim([0,450]);
 xlabel('x_1');
 ylabel('x_2');
 set(gca,'YDir','normal');
-title('ML Classification using Parzen Window Estimation');
-legend('Cluster A', 'Cluster B', 'Cluster C');
+title('ML Classification on Test Data using Parzen Window Estimation');
+legend('Cluster A - Train', 'Cluster B - Train', 'Cluster C - Train', 'Cluster A - Test', 'Cluster B - Test', 'Cluster C - Test');
 % Parzen - compute 2-D density estimates
 %
 % [p,x,y] = parzen( data, res, win )    
